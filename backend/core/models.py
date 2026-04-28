@@ -7,12 +7,12 @@ import uuid
 class User(AbstractUser):
     """Extended user model with banking profile."""
     phone_number = models.CharField(max_length=20, blank=True)
-    national_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    national_id  = models.CharField(max_length=20, unique=True, null=True, blank=True)
     profile_photo = models.ImageField(upload_to='profiles/', null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
-    is_verified = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    is_verified  = models.BooleanField(default=False)
+    created_at   = models.DateTimeField(auto_now_add=True)
+    updated_at   = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'users'
@@ -22,14 +22,11 @@ class User(AbstractUser):
 
 
 class Account(models.Model):
-    """Bank account linked to a user."""
-
     ACCOUNT_TYPES = [
-        ('SAVINGS', 'Savings Account'),
-        ('CURRENT', 'Current Account'),
-        ('FIXED',   'Fixed Deposit'),
+        ('SAVINGS',  'Savings Account'),
+        ('CURRENT',  'Current Account'),
+        ('FIXED',    'Fixed Deposit'),
     ]
-
     STATUS_CHOICES = [
         ('ACTIVE',    'Active'),
         ('SUSPENDED', 'Suspended'),
@@ -65,21 +62,19 @@ class Account(models.Model):
 
 
 class FeeStructure(models.Model):
-    """Configurable fee structure for transaction types."""
-
     TRANSACTION_TYPES = [
         ('DEPOSIT',    'Deposit'),
         ('WITHDRAWAL', 'Withdrawal'),
         ('TRANSFER',   'Transfer'),
     ]
 
-    transaction_type  = models.CharField(max_length=15, choices=TRANSACTION_TYPES, unique=True)
-    flat_fee          = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    percentage_fee    = models.DecimalField(max_digits=5, decimal_places=4, default=0.0000,
-                                            help_text='e.g. 0.02 = 2%')
-    min_fee           = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    max_fee           = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    is_active         = models.BooleanField(default=True)
+    transaction_type = models.CharField(max_length=15, choices=TRANSACTION_TYPES, unique=True)
+    flat_fee         = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    percentage_fee   = models.DecimalField(max_digits=5, decimal_places=4, default=0.0000,
+                                           help_text='e.g. 0.02 = 2%')
+    min_fee          = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    max_fee          = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    is_active        = models.BooleanField(default=True)
 
     class Meta:
         db_table = 'fee_structures'
@@ -96,8 +91,6 @@ class FeeStructure(models.Model):
 
 
 class Transaction(models.Model):
-    """Every financial movement on an account."""
-
     TRANSACTION_TYPES = [
         ('DEPOSIT',    'Deposit'),
         ('WITHDRAWAL', 'Withdrawal'),
@@ -105,7 +98,6 @@ class Transaction(models.Model):
         ('FEE',        'Fee'),
         ('REVERSAL',   'Reversal'),
     ]
-
     STATUS_CHOICES = [
         ('PENDING',   'Pending'),
         ('COMPLETED', 'Completed'),
@@ -115,15 +107,13 @@ class Transaction(models.Model):
 
     id               = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     reference        = models.CharField(max_length=50, unique=True)
-    account          = models.ForeignKey(Account, on_delete=models.CASCADE,
-                                         related_name='transactions')
+    account          = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='transactions')
     transaction_type = models.CharField(max_length=15, choices=TRANSACTION_TYPES)
     amount           = models.DecimalField(max_digits=15, decimal_places=2)
     fee              = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     balance_before   = models.DecimalField(max_digits=15, decimal_places=2)
     balance_after    = models.DecimalField(max_digits=15, decimal_places=2)
     description      = models.TextField(blank=True)
-    # For transfers: the counterpart account
     related_account  = models.ForeignKey(Account, on_delete=models.SET_NULL,
                                           null=True, blank=True, related_name='incoming_transactions')
     status           = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
@@ -131,8 +121,8 @@ class Transaction(models.Model):
     completed_at     = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        db_table      = 'transactions'
-        ordering      = ['-created_at']
+        db_table = 'transactions'
+        ordering = ['-created_at']
 
     def __str__(self):
         return f"{self.reference} | {self.transaction_type} | {self.amount}"
@@ -151,8 +141,6 @@ class Transaction(models.Model):
 
 
 class Notification(models.Model):
-    """In-app notifications for the user."""
-
     TYPES = [
         ('TRANSACTION', 'Transaction'),
         ('SECURITY',    'Security'),

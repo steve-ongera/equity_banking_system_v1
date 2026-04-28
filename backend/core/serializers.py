@@ -8,19 +8,15 @@ from decimal import Decimal
 from .models import User, Account, Transaction, FeeStructure, Notification
 
 
-# ─────────────────────────────────────────────
-#  Auth
-# ─────────────────────────────────────────────
+# ─── Auth ───────────────────────────────────────────────────────────────────
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    """Attach extra user info to the JWT payload."""
-
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        token['username']   = user.username
-        token['full_name']  = user.get_full_name()
-        token['is_verified']= user.is_verified
+        token['username']    = user.username
+        token['full_name']   = user.get_full_name()
+        token['is_verified'] = user.is_verified
         return token
 
     def validate(self, attrs):
@@ -30,8 +26,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password  = serializers.CharField(write_only=True, required=True,
-                                       validators=[validate_password])
+    password  = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
 
     class Meta:
@@ -51,14 +46,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)
         user.save()
-        # Auto-create a default savings account
         Account.objects.create(user=user, account_type='SAVINGS')
         return user
 
 
-# ─────────────────────────────────────────────
-#  User
-# ─────────────────────────────────────────────
+# ─── User ────────────────────────────────────────────────────────────────────
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
@@ -74,9 +66,7 @@ class UserSerializer(serializers.ModelSerializer):
         return obj.get_full_name()
 
 
-# ─────────────────────────────────────────────
-#  Account
-# ─────────────────────────────────────────────
+# ─── Account ─────────────────────────────────────────────────────────────────
 
 class AccountSerializer(serializers.ModelSerializer):
     owner = serializers.StringRelatedField(source='user', read_only=True)
@@ -89,9 +79,7 @@ class AccountSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'account_number', 'balance', 'created_at', 'updated_at']
 
 
-# ─────────────────────────────────────────────
-#  Transaction
-# ─────────────────────────────────────────────
+# ─── Transaction ─────────────────────────────────────────────────────────────
 
 class TransactionSerializer(serializers.ModelSerializer):
     account_number = serializers.CharField(source='account.account_number', read_only=True)
@@ -107,9 +95,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-# ─────────────────────────────────────────────
-#  Operations  (write serializers)
-# ─────────────────────────────────────────────
+# ─── Operations ──────────────────────────────────────────────────────────────
 
 class DepositSerializer(serializers.Serializer):
     account_id  = serializers.UUIDField()
@@ -129,24 +115,26 @@ class DepositSerializer(serializers.Serializer):
         amount      = self.validated_data['amount']
         description = self.validated_data.get('description', 'Deposit')
 
-        fee_struct  = FeeStructure.objects.filter(transaction_type='DEPOSIT', is_active=True).first()
-        fee         = fee_struct.calculate_fee(amount) if fee_struct else Decimal('0')
+        fee_struct = FeeStructure.objects.filter(transaction_type='DEPOSIT', is_active=True).first()
+        fee        = fee_struct.calculate_fee(amount) if fee_struct else Decimal('0')
 
         with db_transaction.atomic():
-            bal_before        = account.balance
-            account.balance  += (amount - fee)
+            bal_before       = account.balance
+            account.balance += (amount - fee)
             account.save()
 
             txn = Transaction.objects.create(
-                account          = account,
-                transaction_type = 'DEPOSIT',
-                amount           = amount,
-                fee              = fee,
-                balance_before   = bal_before,
-                balance_after    = account.balance,
-                description      = description,
-                status           = 'COMPLETED',
-                completed_at     = timezone.now(),
+                account=account, transaction_type='DEPOSIT',
+                amount=amount, fee=fee,
+                balance_before=bal_before, balance_after=account.balance,
+                description=description, status='COMPLETED', completed_at=timezone.now(),
+            )
+
+            Notification.objects.create(
+                user=account.user,
+                title='Deposit Successful',
+                message=f'KES {amount} deposited. Fee: KES {fee}. New balance: KES {account.balance}.',
+                ntype='TRANSACTION',
             )
         return txn
 
@@ -181,20 +169,22 @@ class WithdrawalSerializer(serializers.Serializer):
         description = self.validated_data.get('description', 'Withdrawal')
 
         with db_transaction.atomic():
-            bal_before        = account.balance
-            account.balance  -= (amount + fee)
+            bal_before       = account.balance
+            account.balance -= (amount + fee)
             account.save()
 
             txn = Transaction.objects.create(
-                account          = account,
-                transaction_type = 'WITHDRAWAL',
-                amount           = amount,
-                fee              = fee,
-                balance_before   = bal_before,
-                balance_after    = account.balance,
-                description      = description,
-                status           = 'COMPLETED',
-                completed_at     = timezone.now(),
+                account=account, transaction_type='WITHDRAWAL',
+                amount=amount, fee=fee,
+                balance_before=bal_before, balance_after=account.balance,
+                description=description, status='COMPLETED', completed_at=timezone.now(),
+            )
+
+            Notification.objects.create(
+                user=account.user,
+                title='Withdrawal Successful',
+                message=f'KES {amount} withdrawn. Fee: KES {fee}. New balance: KES {account.balance}.',
+                ntype='TRANSACTION',
             )
         return txn
 
@@ -240,48 +230,45 @@ class TransferSerializer(serializers.Serializer):
         description = self.validated_data.get('description', 'Transfer')
 
         with db_transaction.atomic():
-            # Debit sender
             bal_before_from   = from_acc.balance
             from_acc.balance -= (amount + fee)
             from_acc.save()
 
             debit_txn = Transaction.objects.create(
-                account          = from_acc,
-                transaction_type = 'TRANSFER',
-                amount           = amount,
-                fee              = fee,
-                balance_before   = bal_before_from,
-                balance_after    = from_acc.balance,
-                description      = f'Transfer to {to_acc.account_number}: {description}',
-                related_account  = to_acc,
-                status           = 'COMPLETED',
-                completed_at     = timezone.now(),
+                account=from_acc, transaction_type='TRANSFER',
+                amount=amount, fee=fee,
+                balance_before=bal_before_from, balance_after=from_acc.balance,
+                description=f'Transfer to {to_acc.account_number}: {description}',
+                related_account=to_acc, status='COMPLETED', completed_at=timezone.now(),
             )
 
-            # Credit receiver (no fee for receiver)
             bal_before_to   = to_acc.balance
             to_acc.balance += amount
             to_acc.save()
 
             Transaction.objects.create(
-                account          = to_acc,
-                transaction_type = 'TRANSFER',
-                amount           = amount,
-                fee              = Decimal('0'),
-                balance_before   = bal_before_to,
-                balance_after    = to_acc.balance,
-                description      = f'Transfer from {from_acc.account_number}: {description}',
-                related_account  = from_acc,
-                status           = 'COMPLETED',
-                completed_at     = timezone.now(),
+                account=to_acc, transaction_type='TRANSFER',
+                amount=amount, fee=Decimal('0'),
+                balance_before=bal_before_to, balance_after=to_acc.balance,
+                description=f'Transfer from {from_acc.account_number}: {description}',
+                related_account=from_acc, status='COMPLETED', completed_at=timezone.now(),
+            )
+
+            Notification.objects.create(
+                user=from_acc.user, title='Transfer Sent',
+                message=f'KES {amount} sent to {to_acc.account_number}. Fee: KES {fee}.',
+                ntype='TRANSACTION',
+            )
+            Notification.objects.create(
+                user=to_acc.user, title='Transfer Received',
+                message=f'KES {amount} received from {from_acc.account_number}.',
+                ntype='TRANSACTION',
             )
 
         return debit_txn
 
 
-# ─────────────────────────────────────────────
-#  Notification
-# ─────────────────────────────────────────────
+# ─── Notification ─────────────────────────────────────────────────────────────
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
