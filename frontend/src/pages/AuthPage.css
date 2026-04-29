@@ -120,3 +120,28 @@
   .auth-card { padding: 28px 20px; }
   .auth-card__grid { grid-template-columns: 1fr; }
 }
+
+
+.field-icon-wrap {
+  position: relative;
+}
+
+.field-icon-wrap__toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+
+.field-icon-wrap__toggle:hover {
+  color: var(--green);
+}

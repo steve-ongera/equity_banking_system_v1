@@ -6,9 +6,10 @@ import './AuthPage.css';
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate  = useNavigate();
-  const [form, setForm]     = useState({ username: '', password: '' });
-  const [error, setError]   = useState('');
+  const [form, setForm]       = useState({ username: '', password: '' });
+  const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPw, setShowPw]   = useState(false);
 
   const handle = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
 
@@ -59,17 +60,31 @@ export default function LoginPage() {
               />
             </div>
           </div>
+
           <div className="field">
             <label>Password</label>
             <div className="field-icon-wrap">
               <i className="bi bi-lock field-icon" />
               <input
-                name="password" type="password" value={form.password}
-                onChange={handle} placeholder="••••••••"
+                name="password"
+                type={showPw ? 'text' : 'password'}
+                value={form.password}
+                onChange={handle}
+                placeholder="••••••••"
                 required
               />
+              <button
+                type="button"
+                className="field-icon-wrap__toggle"
+                onClick={() => setShowPw(v => !v)}
+                tabIndex={-1}
+                aria-label={showPw ? 'Hide password' : 'Show password'}
+              >
+                <i className={`bi ${showPw ? 'bi-eye-slash' : 'bi-eye'}`} />
+              </button>
             </div>
           </div>
+
           <button className="btn-submit btn-submit--green" disabled={loading}>
             {loading ? <><i className="bi bi-arrow-repeat spin" /> Signing in…</> : <>Sign In <i className="bi bi-arrow-right" /></>}
           </button>
