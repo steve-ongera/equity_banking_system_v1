@@ -1,0 +1,78 @@
+.accounts-page { display: flex; flex-direction: column; gap: 20px; }
+
+.accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.account-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.account-card__icon {
+  width: 52px; height: 52px;
+  background: var(--green-dim);
+  color: var(--green);
+  border-radius: 14px;
+  display: grid; place-items: center;
+  font-size: 1.4rem;
+}
+.account-card__type {
+  font-family: var(--font-head);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.account-card__number {
+  font-family: var(--font-head);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+.account-card__divider {
+  height: 1px;
+  background: var(--border);
+  margin: 18px 0;
+}
+.account-card__balance-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+.account-card__balance {
+  font-family: var(--font-head);
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--green);
+  letter-spacing: -0.03em;
+  margin-top: 4px;
+}
+.account-card__meta {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.account-card__meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.account-card__meta-label {
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.account-card__meta-val {
+  font-size: 0.85rem;
+  font-weight: 600;
+}

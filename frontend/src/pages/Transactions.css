@@ -1,0 +1,40 @@
+.txns-page { max-width: 760px; }
+
+.txns-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.txns-filter-pill {
+  padding: 6px 16px;
+  border-radius: 99px;
+  border: 1.5px solid var(--border);
+  background: none;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.txns-filter-pill:hover { border-color: var(--green); color: var(--green); }
+.txns-filter-pill--active {
+  background: var(--green-dim);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.txns-loading, .txns-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.txns-empty i { font-size: 2.5rem; }
+
+.txns-list { display: flex; flex-direction: column; }
