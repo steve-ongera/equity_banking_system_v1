@@ -7,6 +7,9 @@ import './OperationPage.css';
 
 const fmt = (n) => 'KES ' + Number(n).toLocaleString('en-KE', { minimumFractionDigits: 2 });
 
+const toArray = (data) =>
+  Array.isArray(data) ? data : data?.results ?? data?.data ?? data?.accounts ?? data?.fees ?? [];
+
 export default function Deposit() {
   const [accounts, setAccounts] = useState([]);
   const [fees, setFees]         = useState([]);
@@ -19,11 +22,11 @@ export default function Deposit() {
 
   useEffect(() => {
     getAccounts().then(r => {
-      const active = r.data.filter(a => a.status === 'ACTIVE');
+      const active = toArray(r.data).filter(a => a.status === 'ACTIVE');
       setAccounts(active);
       if (active.length) setSelectedAcc(active[0].id);
     });
-    getFees().then(r => setFees(r.data));
+    getFees().then(r => setFees(toArray(r.data)));
   }, []);
 
   const depositFee = fees.find(f => f.transaction_type === 'DEPOSIT');
@@ -88,7 +91,6 @@ export default function Deposit() {
           </div>
         )}
 
-        {/* Account selector */}
         <div className="op-account-select" style={{ margin: '16px 0' }}>
           <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
             Select Account

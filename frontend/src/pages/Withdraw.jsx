@@ -6,6 +6,8 @@ import Button    from '../components/Button';
 import './OperationPage.css';
 
 const fmt = (n) => 'KES ' + Number(n).toLocaleString('en-KE', { minimumFractionDigits: 2 });
+const toArray = (data) =>
+  Array.isArray(data) ? data : data?.results ?? data?.data ?? data?.accounts ?? data?.fees ?? [];
 
 export default function Withdraw() {
   const [accounts, setAccounts]     = useState([]);
@@ -19,11 +21,11 @@ export default function Withdraw() {
 
   useEffect(() => {
     getAccounts().then(r => {
-      const active = r.data.filter(a => a.status === 'ACTIVE');
+      const active = toArray(r.data).filter(a => a.status === 'ACTIVE');
       setAccounts(active);
       if (active.length) setSelectedAcc(active[0].id);
     });
-    getFees().then(r => setFees(r.data));
+    getFees().then(r => setFees(toArray(r.data)));
   }, []);
 
   const withdrawFee = fees.find(f => f.transaction_type === 'WITHDRAWAL');
@@ -35,7 +37,7 @@ export default function Withdraw() {
     return fee;
   };
 
-  const estimatedFee = calcFee(amount);
+  const estimatedFee  = calcFee(amount);
   const totalDeducted = amount ? (parseFloat(amount) + estimatedFee).toFixed(2) : 0;
 
   const handleSubmit = async (e) => {

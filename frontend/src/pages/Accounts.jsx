@@ -18,7 +18,13 @@ export default function Accounts() {
 
   useEffect(() => {
     getAccounts()
-      .then(r => setAccounts(r.data))
+      .then(r => {
+        const data = r.data;
+        const list = Array.isArray(data)
+          ? data
+          : data.results ?? data.accounts ?? data.data ?? [];
+        setAccounts(list);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);

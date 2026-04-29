@@ -6,6 +6,8 @@ import Button    from '../components/Button';
 import './OperationPage.css';
 
 const fmt = (n) => 'KES ' + Number(n).toLocaleString('en-KE', { minimumFractionDigits: 2 });
+const toArray = (data) =>
+  Array.isArray(data) ? data : data?.results ?? data?.data ?? data?.accounts ?? data?.fees ?? [];
 
 export default function Transfer() {
   const [accounts, setAccounts]     = useState([]);
@@ -20,11 +22,11 @@ export default function Transfer() {
 
   useEffect(() => {
     getAccounts().then(r => {
-      const active = r.data.filter(a => a.status === 'ACTIVE');
+      const active = toArray(r.data).filter(a => a.status === 'ACTIVE');
       setAccounts(active);
       if (active.length) setSelectedAcc(active[0].id);
     });
-    getFees().then(r => setFees(r.data));
+    getFees().then(r => setFees(toArray(r.data)));
   }, []);
 
   const transferFee = fees.find(f => f.transaction_type === 'TRANSFER');
@@ -94,7 +96,6 @@ export default function Transfer() {
           </div>
         )}
 
-        {/* From account */}
         <div className="op-account-select" style={{ margin: '16px 0 20px' }}>
           <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
             From Account
