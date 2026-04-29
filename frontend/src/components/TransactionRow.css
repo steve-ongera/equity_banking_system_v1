@@ -1,0 +1,43 @@
+.txn-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition);
+}
+.txn-row:last-child { border-bottom: none; }
+.txn-row:hover { background: var(--bg3); border-radius: 8px; padding: 12px 8px; margin: 0 -8px; }
+
+.txn-row__icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: grid; place-items: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.txn-row__body { flex: 1; min-width: 0; }
+.txn-row__desc {
+  font-weight: 500;
+  font-size: 0.88rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+.txn-row__ref { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+.txn-row__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.txn-row__amount {
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.txn-row__fee { font-size: 0.7rem; color: var(--muted); }
