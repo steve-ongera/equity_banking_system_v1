@@ -3,12 +3,16 @@ import { useAuth } from '../context/AuthContext';
 import './Sidebar.css';
 
 const NAV = [
-  { to: '/',            icon: 'bi-grid-1x2-fill',       label: 'Dashboard' },
-  { to: '/accounts',   icon: 'bi-wallet2',              label: 'Accounts' },
-  { to: '/transactions',icon:'bi-arrow-left-right',     label: 'Transactions' },
-  { to: '/deposit',    icon: 'bi-arrow-down-circle-fill',label: 'Deposit' },
-  { to: '/withdraw',   icon: 'bi-arrow-up-circle-fill', label: 'Withdraw' },
-  { to: '/transfer',   icon: 'bi-send-fill',            label: 'Transfer' },
+  { to: '/',               icon: 'bi-grid-1x2-fill',        label: 'Dashboard'      },
+  { to: '/accounts',       icon: 'bi-wallet2',               label: 'Accounts'       },
+  { to: '/transactions',   icon: 'bi-arrow-left-right',      label: 'Transactions'   },
+  { to: '/deposit',        icon: 'bi-arrow-down-circle-fill', label: 'Deposit'       },
+  { to: '/withdraw',       icon: 'bi-arrow-up-circle-fill',  label: 'Withdraw'       },
+  { to: '/transfer',       icon: 'bi-send-fill',             label: 'Transfer'       },
+  { to: '/mini-statement', icon: 'bi-file-text-fill',        label: 'Statement'      },
+  { to: '/reports',        icon: 'bi-bar-chart-fill',        label: 'Reports'        },
+  { to: '/profile',        icon: 'bi-person-circle',         label: 'Profile'        },
+  { to: '/security',       icon: 'bi-shield-lock-fill',      label: 'Security'       },
 ];
 
 export default function Sidebar({ open, onClose }) {

@@ -7,14 +7,14 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Attach token
+// ─── Attach token ──────────────────────────────────────────────────────────
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Auto-refresh on 401
+// ─── Auto-refresh on 401 ───────────────────────────────────────────────────
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
@@ -37,9 +37,8 @@ api.interceptors.response.use(
 );
 
 // ─── Auth ──────────────────────────────────────────────────────────────────
-export const login = (username, password) =>
+export const login    = (username, password) =>
   api.post('/auth/login/', { username, password });
-
 export const register = (payload) =>
   api.post('/auth/register/', payload);
 
@@ -47,8 +46,8 @@ export const register = (payload) =>
 export const getDashboard = () => api.get('/dashboard/');
 
 // ─── Accounts ──────────────────────────────────────────────────────────────
-export const getAccounts = () => api.get('/accounts/');
-export const getAccount  = (id) => api.get(`/accounts/${id}/`);
+export const getAccounts = ()    => api.get('/accounts/');
+export const getAccount  = (id)  => api.get(`/accounts/${id}/`);
 
 // ─── Transactions ──────────────────────────────────────────────────────────
 export const getTransactions = (params = {}) =>
@@ -60,15 +59,16 @@ export const withdraw = (payload) => api.post('/withdraw/', payload);
 export const transfer = (payload) => api.post('/transfer/', payload);
 
 // ─── Notifications ─────────────────────────────────────────────────────────
-export const getNotifications  = () => api.get('/notifications/');
-export const markAllRead       = () => api.delete('/notifications/1/');
-export const markRead          = (id) => api.post(`/notifications/${id}/`);
+export const getNotifications = ()    => api.get('/notifications/');
+export const markRead         = (id)  => api.post(`/notifications/${id}/`);
+export const markAllRead      = ()    => api.delete('/notifications/1/');
 
 // ─── Fees ──────────────────────────────────────────────────────────────────
 export const getFees = () => api.get('/fees/');
 
-// ─── Me ────────────────────────────────────────────────────────────────────
-export const getMe        = () => api.get('/me/');
-export const updateMe     = (payload) => api.patch('/me/', payload);
+// ─── Me / Profile ──────────────────────────────────────────────────────────
+export const getMe          = ()        => api.get('/me/');
+export const updateMe       = (payload) => api.patch('/me/', payload);
+export const changePassword = (payload) => api.post('/me/change-password/', payload);
 
 export default api;
